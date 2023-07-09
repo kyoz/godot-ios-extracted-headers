@@ -3,4 +3,5 @@
 .cache
 .sconsign.dblite
 godot
+godot-*
 bin
