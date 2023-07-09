@@ -14,26 +14,30 @@ fi
 
 for version in "${BUILD_VERSIONS[@]}"; do
     # Install template, will bypass cached templates
-    echo ">> Install godot source..."
+    echo ">> Install Godot source..."
     ./scripts/install.sh $version
 
     rm -rf godot
     rm -rf bin
     mkdir bin
 
-    echo ">> Extract godot source..."
+    echo ">> Extract Godot source..."
     SOURCE_FILE=$(get_ios_template_full_name $version)
     SOURCE_FILE_NAME=$(get_ios_template_name $version)
     tar -xf ${CACHE_DIR}/${SOURCE_FILE}
     mv ${SOURCE_FILE_NAME} godot
 
-    echo ">> Extract godot headers..."
+    echo ">> Generate Godot headers..."
+    MAJOR_VERSION=$(get_ios_major_version $version)
+    ./scripts/generate-headers.sh $MAJOR_VERSION
+
+    echo ">> Extract Godot headers..."
     rsync -a -m -R --include '*/' --include '*.h' --include '*.inc' --exclude '*' ./godot ./bin/extracted_headers
 
-    echo ">> Pack godot extracted headers..."
+    echo ">> Pack Godot extracted headers..."
     cd bin/extracted_headers
     ZIP_FILE="extracted_headers_godot_${version}.zip"
-    zip -r $ZIP_FILE godot/
+    zip -r -q $ZIP_FILE godot/
     cd ../..
     mv bin/extracted_headers/$ZIP_FILE .release/$ZIP_FILE
 done
